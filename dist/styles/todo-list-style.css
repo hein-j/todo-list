@@ -1,0 +1,21 @@
+.checkbox {
+    width: 30px;
+    height: 30px;
+    background-color: gray;
+}
+
+.crossed-out {
+    text-decoration: line-through;
+}
+
+.high {
+    background-color: red;
+}
+
+.medium {
+    background-color: orange;
+}
+
+.low {
+    background-color: green;
+}
