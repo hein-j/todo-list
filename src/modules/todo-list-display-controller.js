@@ -8,19 +8,32 @@ const content = document.querySelector('#content');
 let todoList = document.createElement('div');
 
 function displayTodoList (project) {
+    window.scrollTo(0,0);
     content.innerHTML = '';
     todoList.innerHTML = '';
     todoList.classList.remove('disabled');
+    todoList.id = 'todo-list-wrapper';
     content.appendChild(todoList);
-    let seeProjectsBtn = helpers.buttonMaker('see-projects', 'back to projects');
+    let seeProjectsBtn = document.createElement('p');
+    seeProjectsBtn.innerHTML = '<em><</em> projects'
     seeProjectsBtn.addEventListener('click', projectDisplayController.displayProjectPage);
-    todoList.appendChild(seeProjectsBtn);
+    let headerWrapper = document.createElement('div');
+    headerWrapper.id = 'header-wrapper'
+    todoList.appendChild(headerWrapper);
+    let topMostWrapper = document.createElement('div');
+    topMostWrapper.id = 'top-most-wrapper'
+    headerWrapper.appendChild(topMostWrapper);
+    topMostWrapper.appendChild(seeProjectsBtn);
+    seeProjectsBtn.id = 'see-projects-btn';
+    let optionsBtn = document.createElement('img');
+    optionsBtn.id = 'options-btn';
+    optionsBtn.src = 'https://upload.wikimedia.org/wikipedia/commons/b/b2/Hamburger_icon.svg'
+    optionsBtn.alt = 'Button for project options'
+    optionsBtn.addEventListener('click', () => displayProjectOptions(project));
+    topMostWrapper.appendChild(optionsBtn);
     let title = document.createElement('h1');
     title.innerText = project.name;
-    todoList.appendChild(title);
-    let optionsBtn = helpers.buttonMaker('options', 'See options');
-    optionsBtn.addEventListener('click', () => displayProjectOptions(project));
-    todoList.appendChild(optionsBtn);
+    headerWrapper.appendChild(title);
     let listToDisplay = project.todoList.slice(0);
     if (project.sortBy === 'due') {
         let noDueDate = listToDisplay.filter(todo => todo.dueDate === '');
@@ -58,6 +71,7 @@ function displayTodoList (project) {
             row.classList.add(`${todo.priority}`);
         }
         let checkBoxCell = document.createElement('td');
+        checkBoxCell.classList.add('checkbox-cell');
         let checkBox = document.createElement('div');
         checkBox.addEventListener('click', function () {
             let that = this;
@@ -70,6 +84,7 @@ function displayTodoList (project) {
         row.appendChild(checkBoxCell);
         
         let taskTitleCell = document.createElement('td');
+        taskTitleCell.classList.add('title-cell');
         taskTitleCell.addEventListener('click', () => {
             let index = project.todoList.indexOf(todo);
             displayEditTodo(project.todoList[index], project);
@@ -80,6 +95,11 @@ function displayTodoList (project) {
         row.appendChild(taskTitleCell);
         
         let dueDateCell = document.createElement('td');
+        dueDateCell.classList.add('date-cell');
+        dueDateCell.addEventListener('click', () => {
+            let index = project.todoList.indexOf(todo);
+            displayEditTodo(project.todoList[index], project);
+        })
         let dueDate = document.createElement('p');
         if (todo.dueDate === '') {
             dueDate.innerText = '';
@@ -92,15 +112,27 @@ function displayTodoList (project) {
 
         list.appendChild(row);
     }
+    let addTable = document.createElement('table');
+    addTable.id = 'add-table'
+    let addTaskRow = document.createElement('tr');
+    addTaskRow.addEventListener('click', () => displayAddNewTodo(project));
+    addTable.appendChild(addTaskRow);
+    let checkboxCell = document.createElement('td');
+    checkboxCell.classList.add('checkbox-cell')
+    addTaskRow.appendChild(checkboxCell);
+    let checkbox = document.createElement('div');
+    checkboxCell.appendChild(checkbox);
+    checkbox.classList.add('checkbox');
+    let addTaskCopyCell = document.createElement('td');
+    addTaskRow.appendChild(addTaskCopyCell);
+    addTaskCopyCell.classList.add('title-cell');
+    let addTaskCopy = document.createElement('p');
+    addTaskCopy.id = 'add-task-copy';
+    addTaskCopy.innerText = 'Add new task...'
+    addTaskCopyCell.appendChild(addTaskCopy);    
     
-    let row = document.createElement('tr');
-    let addTaskCell = document.createElement('td');
-    let addTaskBtn = helpers.buttonMaker('add-task', 'Add task');
-    addTaskBtn.addEventListener('click', () => displayAddNewTodo(project));
-    addTaskCell.appendChild(addTaskBtn);
-    row.appendChild(addTaskCell);
-    list.appendChild(row);
     todoList.appendChild(list);
+    todoList.appendChild(addTable);
 }
 
 function formatDisplayedDueDate (date) {
@@ -126,7 +158,9 @@ function displayProjectOptions (project) {
     todoList.classList.add('disabled');
     let projectOptions = document.createElement('div');
     content.appendChild(projectOptions);
-    let cancelBtn = helpers.buttonMaker('cancel-add', 'Cancel');
+    projectOptions.classList.add('popup-window');
+    projectOptions.id = 'project-options'
+    let cancelBtn = helpers.cancelBtnMaker();
     projectOptions.appendChild(cancelBtn);
     cancelBtn.addEventListener('click', function () {
         content.removeChild(projectOptions);
@@ -135,54 +169,72 @@ function displayProjectOptions (project) {
     let projectOptionsForm = document.createElement('form');
     projectOptions.appendChild(projectOptionsForm);
     let nameLabel = document.createElement('label');
+    nameLabel.classList.add('label');
     projectOptionsForm.appendChild(nameLabel);
     nameLabel.for = 'project-name';
     nameLabel.innerText = 'Project Name: ';
     let projectName = document.createElement('input');
     projectOptionsForm.appendChild(projectName);
     projectName.id = 'project-name';
+    projectName.classList.add('field');
     projectName.value = project.name;
     projectName.required = true;
+    projectName.placeholder = 'Required';
     projectName.addEventListener('input', toggleSubmitBtn);
 
+    let checkedItemsWrapper = document.createElement('div');
     let checkedItemsLabel = document.createElement('label');
-    projectOptionsForm.appendChild(checkedItemsLabel);
+    checkedItemsWrapper.appendChild(checkedItemsLabel);
+    checkedItemsWrapper.id = 'checked-items-wrapper';
     checkedItemsLabel.for = 'show-checked'
-    checkedItemsLabel.innerText = 'Show checked items?'
+    checkedItemsLabel.innerText = 'Show checked items: '
     let showCheckedItems = document.createElement('input');
     showCheckedItems.type = 'checkbox';
-    projectOptionsForm.appendChild(showCheckedItems);
+    checkedItemsWrapper.appendChild(showCheckedItems);
     showCheckedItems.id = 'show-checked';
     showCheckedItems.checked = project.showCheckedItems;
     showCheckedItems.addEventListener('input', toggleSubmitBtn);
+    projectOptionsForm.appendChild(checkedItemsWrapper);
 
     let sortByParagraph = document.createElement('p');
+    sortByParagraph.id = 'sort-by-paragraph';
     projectOptionsForm.appendChild(sortByParagraph);
-    sortByParagraph.innerText = 'Sort by?';
+    sortByParagraph.innerText = 'Sort by:';
     let sortByCreatedLabel = document.createElement('label');
-    projectOptionsForm.appendChild(sortByCreatedLabel);
     sortByCreatedLabel.for = 'by-created';
     sortByCreatedLabel.innerText = 'date created';
     let sortByCreated = document.createElement('input');
-    projectOptionsForm.appendChild(sortByCreated);
     sortByCreated.type = 'radio';
     sortByCreated.id = 'by-created';
     sortByCreated.value = 'created';
     sortByCreated.name = 'sort-by';
     sortByCreated.addEventListener('input', toggleSubmitBtn);
     let sortByDueLabel = document.createElement('label');
-    projectOptionsForm.appendChild(sortByDueLabel);
     sortByDueLabel.for = 'by-due'
     sortByDueLabel.innerText = 'due date'
     let sortByDue = document.createElement('input');
-    projectOptionsForm.appendChild(sortByDue);
     sortByDue.type = 'radio';
     sortByDue.id = 'by-due';
     sortByDue.value = 'due';
     sortByDue.name = 'sort-by';
     sortByDue.addEventListener('input', toggleSubmitBtn);
+
+    let sortByWrapper = document.createElement('div');
+    sortByWrapper.id = 'sort-by-wrapper';
+    projectOptionsForm.appendChild(sortByWrapper);
+    let dateCreatedWrapper = document.createElement('div');
+    let dateDueWrapper = document.createElement('div');
+    sortByWrapper.appendChild(dateCreatedWrapper);
+    sortByWrapper.appendChild(dateDueWrapper);
+    dateCreatedWrapper.appendChild(sortByCreated);
+    dateCreatedWrapper.appendChild(sortByCreatedLabel);
+    dateDueWrapper.appendChild(sortByDue);
+    dateDueWrapper.appendChild(sortByDueLabel);    
+
+
     document.querySelector(`#by-${project.sortBy}`).checked = true;
-    let submitBtn = helpers.buttonMaker('submit-change', 'Submit change');
+    let submitBtn = helpers.buttonMaker('submit-change', 'Submit');
+    submitBtn.classList.add('submit-btn');
     projectOptionsForm.appendChild(submitBtn);
     submitBtn.classList.add('disabled');
     submitBtn.addEventListener('click', function () {
@@ -195,6 +247,7 @@ function displayProjectOptions (project) {
         todoList.classList.remove('disabled');
     })
     let deleteProjectsBtn = helpers.buttonMaker('delete-project', 'Delete project');
+    deleteProjectsBtn.classList.add('submit-btn', 'delete-btn');
     projectOptionsForm.appendChild(deleteProjectsBtn);
     deleteProjectsBtn.addEventListener('click', function () {
         project.remove();
@@ -214,11 +267,12 @@ function displayProjectOptions (project) {
     }
 }
 
-function displayAddNewTodo (project) {
+function TodoWindow () {
     todoList.classList.add('disabled');
     let popUp = document.createElement('div');
+    popUp.classList.add('popup-window');
     content.appendChild(popUp);
-    let cancelBtn = helpers.buttonMaker('cancel-add-todo', 'x');
+    let cancelBtn = helpers.cancelBtnMaker();
     popUp.appendChild(cancelBtn);
     cancelBtn.addEventListener('click', () => {
         content.removeChild(popUp);
@@ -229,21 +283,26 @@ function displayAddNewTodo (project) {
     let titleLabel = document.createElement('label');
     form.appendChild(titleLabel);
     titleLabel.for = 'title';
-    titleLabel.innerText = 'Title * :';
+    titleLabel.innerText = 'Title: ';
+    titleLabel.classList.add('label');
     let title = document.createElement('input');
+    title.placeholder = 'Required'
     form.appendChild(title);
     title.id = 'title';
+    title.classList.add('field');
     title.required = true;
-    title.addEventListener('input', toggleSubmitBtn);
     let descriptionLabel = document.createElement('label');
+    descriptionLabel.classList.add('label');
     form.appendChild(descriptionLabel);
     descriptionLabel.for = 'description';
     descriptionLabel.innerText = 'Description:';
     let description = document.createElement('textarea');
+    description.classList.add('field');
     form.appendChild(description);
     description.id = 'description';
     let dateLabel = document.createElement('label');
     dateLabel.for = 'date';
+    dateLabel.classList.add('label');
     form.appendChild(dateLabel);
     dateLabel.innerText = 'Due date: '
     let date = document.createElement('input');
@@ -253,10 +312,12 @@ function displayAddNewTodo (project) {
     let todaysDate = format(new Date(), 'yyyy-MM-dd');
     date.min = todaysDate;
     let priorityLabel = document.createElement('label');
+    priorityLabel.classList.add('label');
     form.appendChild(priorityLabel);
     priorityLabel.for = 'priority';
     priorityLabel.innerText = 'Priority: ';
     let priority = document.createElement('select');
+    priority.id = 'priority';
     form.appendChild(priority);
     function optionMaker (value, innerText) {
         let option = document.createElement('option');
@@ -269,9 +330,26 @@ function displayAddNewTodo (project) {
     let lowOption = optionMaker('low', 'Low');
     let mediumOption = optionMaker('medium', 'Medium');
     let highOption = optionMaker('high', 'High');
-    let submitBtn = helpers.buttonMaker('submit-todo', 'Add');
+    let submitBtn = helpers.buttonMaker('submit-todo', 'Submit');
+    submitBtn.classList.add('submit-btn');
     form.appendChild(submitBtn);
     submitBtn.classList.add('disabled');
+    return {
+        title,
+        submitBtn,
+        date, 
+        description,
+        priority,
+        popUp,
+        form,
+    }
+}
+
+function displayAddNewTodo (project) {
+    let addNewTodo = TodoWindow();
+    let {title, submitBtn, date, description, priority, popUp} = addNewTodo;
+    popUp.id = 'add-todo-wrapper';
+    title.addEventListener('input', toggleSubmitBtn);
     function toggleSubmitBtn () {
         if (title.checkValidity()) {
             submitBtn.classList.remove('disabled');
@@ -300,67 +378,17 @@ function displayAddNewTodo (project) {
 }
 
 function displayEditTodo (todo, project) {
-    todoList.classList.add('disabled');
-    let popUp = document.createElement('div');
-    content.appendChild(popUp);
-    let cancelBtn = helpers.buttonMaker('cancel-add-todo', 'x');
-    popUp.appendChild(cancelBtn);
-    cancelBtn.addEventListener('click', () => {
-        content.removeChild(popUp);
-        todoList.classList.remove('disabled');
-    })
-    let form = document.createElement('form');
-    popUp.appendChild(form);
-    let titleLabel = document.createElement('label');
-    form.appendChild(titleLabel);
-    titleLabel.for = 'title';
-    titleLabel.innerText = 'Title * :';
-    let title = document.createElement('input');
-    form.appendChild(title);
+    let editTodo = TodoWindow ();
+    let {title, submitBtn, date, description, priority, popUp, form} = editTodo;
+    popUp.id = 'edit-todo-wrapper'
     title.value = todo.title;
-    title.id = 'title';
-    title.required = true;
     title.addEventListener('input', toggleSubmitBtn);
-    let descriptionLabel = document.createElement('label');
-    form.appendChild(descriptionLabel);
-    descriptionLabel.for = 'description';
-    descriptionLabel.innerText = 'Description:';
-    let description = document.createElement('textarea');
-    form.appendChild(description);
-    description.id = 'description';
     description.value = todo.description;
     description.addEventListener('input', toggleSubmitBtn);
-    let dateLabel = document.createElement('label');
-    dateLabel.for = 'date';
-    form.appendChild(dateLabel);
-    dateLabel.innerText = 'Due date: '
-    let date = document.createElement('input');
-    form.appendChild(date);
-    date.type = 'date';
-    date.id = 'date';
-    let todaysDate = format(new Date(), 'yyyy-MM-dd');
-    date.min = todaysDate;
     if (todo.dueDate !== '') {
         date.value = format(new Date(todo.dueDate), 'yyyy-MM-dd');
     }
     date.addEventListener('input', toggleSubmitBtn);
-    let priorityLabel = document.createElement('label');
-    form.appendChild(priorityLabel);
-    priorityLabel.for = 'priority';
-    priorityLabel.innerText = 'Priority: ';
-    let priority = document.createElement('select');
-    form.appendChild(priority);
-    function optionMaker (value, innerText) {
-        let option = document.createElement('option');
-        option.value = value;
-        option.innerText = innerText;
-        priority.appendChild(option);
-        return option;
-    }
-    let defaultOption = optionMaker('', '---');
-    let lowOption = optionMaker('low', 'Low');
-    let mediumOption = optionMaker('medium', 'Medium');
-    let highOption = optionMaker('high', 'High');
 
     let options = document.querySelectorAll('option');
     for (let option of options) {
@@ -368,12 +396,8 @@ function displayEditTodo (todo, project) {
             option.selected = true;
         }
     }
-
     priority.addEventListener('change', toggleSubmitBtn);
 
-    let submitBtn = helpers.buttonMaker('edit-todo', 'Edit');
-    form.appendChild(submitBtn);
-    submitBtn.classList.add('disabled');
    function toggleSubmitBtn () {
         if (title.checkValidity() &&
             (title.value !== todo.title ||
@@ -412,6 +436,7 @@ function displayEditTodo (todo, project) {
 
 
     let deleteBtn = helpers.buttonMaker('delete-todo', 'Delete');
+    deleteBtn.classList.add('submit-btn');
     form.appendChild(deleteBtn);
     deleteBtn.addEventListener('click', function () {
         todo.remove(project);
