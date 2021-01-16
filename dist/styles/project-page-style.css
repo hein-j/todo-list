@@ -1,0 +1,45 @@
+body {
+    margin: 0;
+}
+
+#no-projects-copy {
+    margin: auto;
+    width: max-content;
+    font-size: 20px;
+}
+
+#add-project-btn {
+    width: 70px;
+}
+
+.no-project-mode {
+    height: 100vh;
+    display: grid;
+    align-content: center;
+}
+
+.no-project-add-btn {
+    width: 150px;
+    display: block;
+    margin: auto;
+}
+
+#add-btn-wrapper {
+    background-color: rgba(255, 255, 255, 80%);
+    width: 100%;
+    text-align: center;
+    position: sticky;
+    height: 75px;
+    bottom: 0px;
+}
+
+.project-container {
+    border-bottom: 1px solid;
+    width: 300px;
+    margin: auto;
+}
+
+.project-name {
+    font-size: 25px;
+    word-break: break-word;
+}
